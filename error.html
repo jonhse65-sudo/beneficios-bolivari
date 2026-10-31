@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error en Verificación Facial</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #ff0066;
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        p {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        /* Imagen combinada */
+        .facialerror-img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .button-container {
+            margin-top: 30px;
+        }
+
+        .boton {
+            background: linear-gradient(90deg, #ff0066, #cc0066);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 18px;
+            cursor: pointer;
+            width: 90%;
+            max-width: 300px;
+        }
+
+        .boton:hover {
+            background: #cc0066;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Tu foto no es válida</h1>
+    <p>Para validar tu identidad, asegúrate de que tu foto se parezca a la de tu cédula. Inténtalo de nuevo.</p>
+
+    <!-- Imagen combinada (cédula + foto tomada) -->
+    <img src="img/facialerror.svg" alt="Error en la verificación facial" class="facialerror-img">
+
+    <!-- Botón para intentar tomar otra foto -->
+    <div class="button-container">
+        <button class="boton" onclick="window.location.href = 'Hot.html';">Reintentar</button>
+    </div>
+
+</body>
+</html>

