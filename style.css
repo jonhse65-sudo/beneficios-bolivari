@@ -1,0 +1,358 @@
+/* ==========================================
+   1. Estilos Generales y Fondo
+   ========================================== */
+body {
+    font-family: 'Open Sans', sans-serif;
+    background-color: #f7fafc; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+/* ==========================================
+   2. Contenedor Principal (Tarjeta Blanca)
+   ========================================== */
+.login-container {
+    background-color: #ffffff;
+    width: 100%;
+    max-width: 480px;
+    padding: 45px;
+    border-radius: 6px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    border: 1px solid #e2e8f0;
+    box-sizing: border-box;
+}
+
+h2 {
+    color: #002d62; 
+    font-size: 34px;
+    font-weight: 400;
+    margin-top: 0;
+    margin-bottom: 35px;
+    letter-spacing: -0.5px;
+}
+
+/* ==========================================
+   3. Campos del Formulario
+   ========================================== */
+.input-group {
+    margin-bottom: 24px;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+input {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+input:focus, .input-focus-inicial {
+    border: 2px solid #3182ce;
+    padding: 13px;
+}
+
+.forgot-link {
+    text-align: right;
+    margin-top: 8px;
+}
+
+.forgot-link a {
+    color: #3182ce;
+    font-size: 13px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+/* ==========================================
+   4. Botón e Indicador de Carga General
+   ========================================== */
+.btn-submit {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    background-color: #fef08a; 
+    color: #9a832a; 
+    border: none;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 10px;
+    margin-bottom: 30px;
+}
+
+.spinner {
+    display: none;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(154, 131, 42, 0.3);
+    border-radius: 50%;
+    border-top-color: #9a832a;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ==========================================
+   5. Mensajes de error en Login
+   ========================================== */
+.error-container {
+    margin-top: -15px;
+    margin-bottom: 25px;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    text-align: center;
+    font-weight: 600;
+    display: none;
+}
+
+.error-activo {
+    display: block;
+    background-color: #fff5f5;
+    color: #c53030;
+    border: 1px solid #feb2b2;
+}
+
+/* ==========================================
+   6. Tarjetas Inferiores
+   ========================================== */
+.extra-options {
+    display: flex;
+    gap: 16px;
+}
+
+.option-card {
+    flex: 1;
+    border: 1px solid #e2e8f0; 
+    border-radius: 6px;
+    padding: 20px 10px;
+    text-align: center;
+    background-color: #ffffff;
+}
+
+.option-card .icon {
+    font-size: 32px;
+    color: #1a202c;
+    margin-bottom: 8px;
+}
+
+.card-title {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: #1a202c;
+}
+
+.card-sub {
+    margin: 2px 0 0 0;
+    font-size: 13px;
+}
+
+.card-sub a {
+    color: #4a5568;
+    text-decoration: none;
+}
+
+/* ==========================================
+   7. DISEÑO ESTRUCTURA DEL MODAL Y CUENTA REGRESIVA
+   ========================================== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #ffffff; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.modal-visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-container {
+    width: 100%;
+    max-width: 480px;
+    padding: 20px;
+    text-align: center;
+}
+
+.modal-title {
+    color: #002d62;
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.modal-instruction {
+    color: #4a5568;
+    font-size: 15px;
+    line-height: 1.5;
+    margin-bottom: 25px;
+    padding: 0 20px;
+}
+
+/* Caja de animación de los 30s */
+.countdown-container {
+    display: none; /* Se activa dinámicamente */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 25px;
+}
+
+.spinner-countdown {
+    width: 28px;
+    height: 28px;
+    border: 3px solid #e2e8f0;
+    border-radius: 50%;
+    border-top-color: #3182ce;
+    animation: spin 1s linear infinite;
+}
+
+.countdown-text {
+    font-size: 14px;
+    color: #4a5568;
+    font-weight: 600;
+}
+
+/* Cuadrículas de los 6 dígitos */
+.otp-container {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.otp-input {
+    width: 45px;
+    height: 50px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 600;
+    color: #1a202c;
+    padding: 0;
+}
+
+.otp-input:disabled {
+    background-color: #f7fafc;
+    border-color: #e2e8f0;
+    color: #a0aec0;
+}
+
+.show-code {
+    text-align: right;
+    max-width: 330px;
+    margin: 0 auto 20px auto;
+}
+
+.show-code a {
+    color: #3182ce;
+    font-size: 13px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+/* Contenedor de Error específico del Modal */
+.error-container-modal {
+    display: none;
+    color: #e02424; /* Rojo de alerta corporativo */
+    background-color: #fde8e8;
+    border: 1px solid #f8b4b4;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: 600;
+    max-width: 330px;
+    margin: 15px auto;
+    text-align: center;
+}
+
+.modal-divider {
+    border: 0;
+    border-top: 1px solid #edf2f7;
+    margin: 20px 0;
+}
+
+.problems-dropdown {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    color: #3182ce;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.dropdown-icon {
+    font-size: 18px;
+}
+
+.btn-continue {
+    width: 100%;
+    background-color: #fef08a;
+    color: #a0aec0; 
+    border: none;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: not-allowed;
+    margin-bottom: 15px;
+}
+
+.btn-back {
+    width: 100%;
+    background-color: #edf2f7; 
+    color: #002d62; 
+    border: none;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* Footer Institucional */
+.footer-banco {
+    margin-top: 30px;
+    font-size: 12px;
+    color: #1a202c;
+    font-weight: 600;
+    text-align: center;
+}
+
+.footer-banco a {
+    color: #3182ce;
+    text-decoration: none;
+}
